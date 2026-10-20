@@ -1,7 +1,7 @@
 export type UserRole = 'super_admin' | 'choir_admin' | 'treasurer' | 'program_coordinator' | 'member';
 export type ProgramType = 'annual' | 'monthly' | 'weekly' | 'occasional';
 export type ProgramStatus = 'planned' | 'upcoming' | 'completed' | 'postponed' | 'cancelled';
-export type AssignmentStatus = 'assigned' | 'completed' | 'absent' | 'reassigned' | 'cancelled';
+export type AssignmentStatus = 'assigned' | 'completed' | 'absent' | 'reassigned' | 'cancelled' | 'draft';
 export type ContributionStatus = 'fully_paid' | 'partially_paid' | 'unpaid' | 'overdue' | 'waived';
 export type PaymentMethod = 'cash' | 'mobile_money' | 'bank_transfer' | 'check' | 'other';
 export type MemberStatus = 'active' | 'inactive' | 'suspended';
@@ -42,12 +42,22 @@ export type Program = {
   program_type: ProgramType;
   scheduled_for: string;
   time?: string;
+  end_time?: string;
   location?: string;
   description: string | null;
   status: ProgramStatus;
   responsible_person?: string;
   created_by: string | null;
   parent_program_id?: string; // For linking annual->monthly->weekly
+  recurrence_rule?: string;
+  recurrence_id?: string; // Series id for recurring programs
+  is_occurrence?: boolean;
+  replaced?: boolean;
+  replaced_by?: string;
+  original_occurrence_id?: string;
+  occurrence_date?: string;
+  occurrence_index?: number;
+  edit_scope?: 'this' | 'this_and_future' | 'all';
   notes?: string;
   completed_at?: string;
   cancelled_at?: string;
@@ -67,8 +77,14 @@ export type ProgramAssignment = {
   assigned_on: string;
   completed_on?: string;
   reassigned_from?: string;
+  previous_member_id?: string;
+  changed_by?: string;
+  changed_at?: string;
+  change_reason?: string;
   accepted?: boolean;
   conflict_reported?: boolean;
+  is_draft?: boolean;
+  published?: boolean;
   created_at: string;
   updated_at: string;
 };

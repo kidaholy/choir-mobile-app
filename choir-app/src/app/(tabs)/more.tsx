@@ -15,6 +15,7 @@ export default function MoreScreen() {
     { title: 'Announcements', icon: 'megaphone-outline', route: '/(tabs)/announcements', color: '#EF4444' },
     { title: 'Reports & Analytics', icon: 'bar-chart-outline', route: '/(tabs)/reports', color: '#8B5CF6' },
     { title: 'Audit Logs', icon: 'document-text-outline', route: '/(tabs)/audit-logs', color: '#6B7280' },
+    { title: 'Demo Data Management', icon: 'flask-outline', route: '/demo-data', color: '#EC4899' },
   ];
 
   return (
