@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "choir-app",
+    "name": "Choir Manager",
     "slug": "choir-app",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/choir-logo.png",
     "scheme": "choirapp",
     "userInterfaceStyle": "automatic",
     "ios": {
