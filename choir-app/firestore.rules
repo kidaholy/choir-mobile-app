@@ -1,0 +1,108 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function getUserData() {
+      return get(/databases/$(database)/documents/members/$(request.auth.uid)).data;
+    }
+    
+    function isSuperAdmin() {
+      return isSignedIn() && getUserData().role == 'super_admin';
+    }
+    
+    function isChoirAdmin() {
+      return isSignedIn() && (getUserData().role == 'choir_admin' || getUserData().role == 'super_admin');
+    }
+    
+    function isTreasurer() {
+      return isSignedIn() && (getUserData().role == 'treasurer' || getUserData().role == 'super_admin');
+    }
+    
+    function isProgramCoordinator() {
+      return isSignedIn() && (getUserData().role == 'program_coordinator' || getUserData().role == 'super_admin');
+    }
+    
+    function isActive() {
+      return isSignedIn() && getUserData().is_active == true && getUserData().status == 'active';
+    }
+    
+    // Members collection
+    match /members/{userId} {
+      allow read: if isActive();
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && 
+        (request.auth.uid == userId || 
+         isSuperAdmin() || 
+         isChoirAdmin());
+      allow delete: if isSuperAdmin();
+    }
+    
+    // Songs collection
+    match /songs/{songId} {
+      allow read: if isActive();
+      allow create, update: if isActive() && (isChoirAdmin() || isSuperAdmin());
+      allow delete: if isChoirAdmin() || isSuperAdmin();
+    }
+    
+    // Programs collection
+    match /programs/{programId} {
+      allow read: if isActive();
+      allow create, update: if isActive() && (isProgramCoordinator() || isChoirAdmin() || isSuperAdmin());
+      allow delete: if isChoirAdmin() || isSuperAdmin();
+    }
+    
+    // Program assignments collection
+    match /programAssignments/{assignmentId} {
+      allow read: if isActive();
+      allow create, update: if isActive() && (isProgramCoordinator() || isChoirAdmin() || isSuperAdmin());
+      allow delete: if isChoirAdmin() || isSuperAdmin();
+    }
+    
+    // Duty categories/roles collection
+    match /dutyCategories/{categoryId} {
+      allow read: if isActive();
+      allow create, update, delete: if isActive() && (isProgramCoordinator() || isChoirAdmin() || isSuperAdmin());
+    }
+    match /roles/{roleId} {
+      allow read: if isActive();
+      allow create, update, delete: if isActive() && (isProgramCoordinator() || isChoirAdmin() || isSuperAdmin());
+    }
+    
+    // Contributions
+    match /contributionCategories/{categoryId} {
+      allow read: if isActive();
+      allow create, update, delete: if isActive() && (isTreasurer() || isSuperAdmin());
+    }
+    
+    match /contributions/{contributionId} {
+      allow read: if isActive();
+      allow create, update, delete: if isActive() && (isTreasurer() || isSuperAdmin());
+    }
+    
+    match /payments/{paymentId} {
+      allow read: if isActive();
+      allow create, update, delete: if isActive() && (isTreasurer() || isSuperAdmin());
+    }
+    
+    match /expenses/{expenseId} {
+      allow read: if isActive();
+      allow create, update, delete: if isActive() && (isTreasurer() || isSuperAdmin());
+    }
+    
+    // Announcements
+    match /announcements/{announcementId} {
+      allow read: if isActive();
+      allow create, update, delete: if isActive() && (isChoirAdmin() || isProgramCoordinator() || isSuperAdmin());
+    }
+    
+    // Audit logs
+    match /auditLogs/{logId} {
+      allow read: if isSuperAdmin();
+      allow create: if isActive();
+      allow update, delete: if false;
+    }
+  }
+}
